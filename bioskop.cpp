@@ -84,4 +84,5 @@ void masuk(int daftar){
 main (){
     int  daftar = 0;
     masuk(daftar);
+    cout << "tes";
 }
