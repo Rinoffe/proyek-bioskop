@@ -1,6 +1,10 @@
 #include <iostream>
 #include <iomanip>
+#include <cstring>
 using namespace std;
+
+const int maksfilm = 3;
+int percobaan = 3;
 
 struct {
     string nama, usn, pass;
@@ -13,7 +17,7 @@ struct JadwalFilm {
     int harga;
 };
 
-JadwalFilm jadwal[3] = {
+JadwalFilm jadwal[maksfilm] = {
     {"Perayaan Mati Rasa", {"09.00 - 11.00", "12.30 - 13.30", "11.15 - 12.15"}, {'A', 'B', 'C'}, 50000},
     {"Petaka Gunung Gede", {"09.00 - 11.00", "11.15 - 12.15", "12.30 - 13.30"}, {'B', 'C', 'A'}, 50000},
     {"Main America: Brave New", {"09.00 - 11.00", "11.15 - 12.15", "12.30 - 13.30"}, {'C', 'B', 'A'}, 50000}
@@ -27,15 +31,18 @@ bool login(int &daftar) {
     cout << "Password : "; cin >> pass;
 
     for (int i = 0; i < daftar; i++) {
-        if (usn == staff[i].usn && pass == staff[i].pass) {
-            cout << "\nBerhasil masuk\n";
-            system("pause");
-            return true;
+        for (int j = 0; j < 3; j++)
+        {
+            if (usn == staff[i].usn && pass == staff[i].pass) {
+                cout << "\nBerhasil masuk\n";
+                system("pause");
+                return true;
+            }
         }
     }
 
-    cout << "\nGagal masuk. Silakan coba lagi.\n";
-    system("pause");
+    // cout << "\nGagal masuk. Silakan coba lagi.\n";
+    // system("pause");
     return false;
 }
 
@@ -109,8 +116,13 @@ void masuk(int &daftar) {
                 if (daftar == 0) {
                     cout << "\nBelum ada pengguna yang terdaftar, mohon daftar terlebih dahulu\n";
                     system("pause");
+                } else if (login(daftar)) {
+                    isLoggedIn = true;
                 } else {
-                    isLoggedIn = login(daftar);
+                    percobaan--;
+                    cout << "\nGagal masuk. Silakan coba lagi.\n";
+                    cout << "Sisa " << percobaan << " kali percobaan.\n";
+                    system("pause");
                 }
                 break;
             case 2:
@@ -127,11 +139,35 @@ void masuk(int &daftar) {
     }
 }
 
+void cariFilm(JadwalFilm jadwal[], int size, const string &keyword) {
+    bool found = false;
+
+    for (int i = 0; i < size; i++) {
+        if (jadwal[i].judul.find(keyword) != string::npos) {
+            cout << "\nFilm ditemukan: \n";
+            cout << "Judul : " << jadwal[i].judul << endl;
+            cout << "Harga : " << jadwal[i].harga << endl;
+            found = true;
+        }
+    }
+
+    if (!found) {
+        cout << "\nFilm tidak ditemukan\n";
+    }
+}
+
 void menuUtama() {
     int pilihan;
+    string keyword;
+
     do {
         system("cls");
         cout << "\n===== Menu Utama Bioskop =====" << endl;
+        cout << "Cari film (masukkan judul): ";
+        cin.ignore();
+        getline(cin, keyword);
+        cariFilm(jadwal, maksfilm, keyword);
+
         cout << "1. Lihat Jadwal Film" << endl;
         cout << "2. Pesan Tiket" << endl;
         cout << "3. Keluar" << endl;
