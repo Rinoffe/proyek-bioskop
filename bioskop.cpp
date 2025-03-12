@@ -23,49 +23,6 @@ JadwalFilm jadwal[maksfilm] = {
     {"Main America: Brave New", {"09.00 - 11.00", "11.15 - 12.15", "12.30 - 13.30"}, {'C', 'B', 'A'}, 50000}
 };
 
-bool login(int &daftar) {
-    string usn, pass;
-    system("cls");
-    cout << "MASUK\n\n";
-    cout << "Username : "; cin >> usn;
-    cout << "Password : "; cin >> pass;
-
-    for (int i = 0; i < daftar; i++) {
-        for (int j = 0; j < 3; j++)
-        {
-            if (usn == staff[i].usn && pass == staff[i].pass) {
-                cout << "\nBerhasil masuk\n";
-                system("pause");
-                return true;
-            }
-        }
-    }
-
-    // cout << "\nGagal masuk. Silakan coba lagi.\n";
-    // system("pause");
-    return false;
-}
-
-void signup(int &daftar) {
-    system("cls");
-    cout << "DAFTAR\n\n";
-    cout << "Nama     : "; cin.ignore(); getline(cin, staff[daftar].nama);
-    cout << "Username : "; cin >> staff[daftar].usn;
-
-    for (int i = 0; i < daftar; i++) {
-        if (staff[daftar].usn == staff[i].usn) {
-            cout << "\nUsername tidak tersedia. Silakan coba username lain.\n";
-            system("pause");
-            return;
-        }
-    }
-
-    cout << "Password : "; cin >> staff[daftar].pass;
-    cout << "\nBerhasil daftar\n";
-    daftar++;
-    system("pause");
-}
-
 void tampilkanJadwal() {
     system("cls");
     cout << "========================================================================================\n";
@@ -99,45 +56,7 @@ void pesanTiket() {
     system("pause");
 }
 
-void masuk(int &daftar) {
-    int kodeMasuk;
-    bool isLoggedIn = false;
 
-    while (!isLoggedIn) {
-        system("cls");
-        cout << "SISTEM BIOSKOP X\n\n";
-        cout << "[1] Masuk\n";
-        cout << "[2] Daftar\n";
-        cout << "[3] Keluar\n";
-        cout << "Pilih : "; cin >> kodeMasuk;
-
-        switch (kodeMasuk) {
-            case 1:
-                if (daftar == 0) {
-                    cout << "\nBelum ada pengguna yang terdaftar, mohon daftar terlebih dahulu\n";
-                    system("pause");
-                } else if (login(daftar)) {
-                    isLoggedIn = true;
-                } else {
-                    percobaan--;
-                    cout << "\nGagal masuk. Silakan coba lagi.\n";
-                    cout << "Sisa " << percobaan << " kali percobaan.\n";
-                    system("pause");
-                }
-                break;
-            case 2:
-                signup(daftar);
-                break;
-            case 3:
-                cout << "Keluar dari program.\n";
-                exit(0);
-            default:
-                cout << "Kode tidak valid\n";
-                system("pause");
-                break;
-        }
-    }
-}
 
 void cariFilm(JadwalFilm jadwal[], int size, const string &keyword) {
     bool found = false;
@@ -162,15 +81,16 @@ void menuUtama() {
 
     do {
         system("cls");
-        cout << "\n===== Menu Utama Bioskop =====" << endl;
-        cout << "Cari film (masukkan judul): ";
-        cin.ignore();
-        getline(cin, keyword);
-        cariFilm(jadwal, maksfilm, keyword);
+        cout << "\n===== Menu Utama Bioskop =====" << endl << endl;
+        // cout << "Cari film (masukkan judul): ";
+        // cin.ignore();
+        // getline(cin, keyword);
+        // cariFilm(jadwal, maksfilm, keyword);
 
         cout << "1. Lihat Jadwal Film" << endl;
         cout << "2. Pesan Tiket" << endl;
-        cout << "3. Keluar" << endl;
+        cout << "3. Cari Film" << endl;
+        cout << "4. Keluar" << endl;
         cout << "Pilih menu (1-3): ";
         cin >> pilihan;
 
@@ -182,18 +102,106 @@ void menuUtama() {
                 pesanTiket();
                 break;
             case 3:
+
+            break;
+            case 4:
                 cout << "Terima kasih telah menggunakan layanan kami!" << endl;
                 break;
             default:
                 cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
                 system("pause");
         }
+        system("cls");
     } while (pilihan != 3);
+}
+
+
+void login(int daftar, bool &ulangMasuk, int limitLogin){
+    string usn, pass;
+    bool ulangLogin = 1;
+
+    if (limitLogin == 0){
+        ulangMasuk = 0;
+        cout << "\nLimit login anda habis\n";
+        system("pause");
+    }else{
+        system("cls");
+        cout << "MASUK\n\n";
+        cout << "Username : "; cin >> usn;
+        cout << "Password : "; cin >> pass;
+
+        for (int i = 0; i < daftar; i++) {
+            if (usn == staff[i].usn && pass == staff[i].pass) {
+                cout << "\nBerhasil masuk\n";
+                ulangLogin = 0;
+                system("pause");
+                menuUtama();
+            }
+        }
+
+        if (ulangLogin){
+            cout << "\nLogin gagal, kesempatan anda tersisa " << limitLogin - 1 << endl;
+            system("pause");
+            login(daftar, ulangMasuk, limitLogin - 1);
+        }
+    }
+}
+
+void signup(int &daftar) {
+    system("cls");
+    cout << "DAFTAR\n\n";
+    cout << "Nama     : "; cin.ignore(); getline(cin, staff[daftar].nama);
+    cout << "Username : "; cin >> staff[daftar].usn;
+
+    for (int i = 0; i < daftar; i++) {
+        if (staff[daftar].usn == staff[i].usn) {
+            cout << "\nUsername tidak tersedia. Silakan coba username lain.\n";
+            system("pause");
+            return;
+        }
+    }
+
+    cout << "Password : "; cin >> staff[daftar].pass;
+    cout << "\nBerhasil daftar\n";
+    daftar++;
+    system("pause");
+}
+
+void masuk(int &daftar) {
+    int kodeMasuk, limitLogin = 3;
+    bool ulangMasuk = 1;
+
+    while (ulangMasuk) {
+        system("cls");
+        cout << "SISTEM BIOSKOP X\n\n";
+        cout << "[1] Masuk\n";
+        cout << "[2] Daftar\n";
+        cout << "[3] Keluar\n";
+        cout << "Pilih : "; cin >> kodeMasuk;
+
+        switch (kodeMasuk) {
+            case 1:
+                if (daftar == 0) {
+                    cout << "\nBelum ada pengguna yang terdaftar, mohon daftar terlebih dahulu\n";
+                    system("pause");
+                }else{
+                    login(daftar, ulangMasuk, limitLogin);
+                }
+            break;
+            case 2:
+                signup(daftar);
+            break;
+            case 3:
+                ulangMasuk = 0;
+            default:
+                cout << "Kode tidak valid\n";
+                system("pause");
+        }
+        system("cls");
+    }
 }
 
 int main() {
     int daftar = 0;
     masuk(daftar);
-    menuUtama();
-    return 0;
 }
