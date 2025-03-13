@@ -5,6 +5,10 @@ using namespace std;
 
 const int maksfilm = 6, maksstudio = 3;
 
+string judulFilm[] = {
+    "Film A", "Film B", "Film C", "Film D","Film E"
+};
+
 struct {
     string nama, usn, pass;
 } staff[100];
@@ -26,13 +30,40 @@ Studio studio[maksstudio] = {
 };
 
 JadwalFilm jadwal[maksfilm] = {
-    {"08:00 - 10:00", {"Film A", "Film B", "Film C"}},
-    {"10:30 - 12:30", {"Film D", "Film E", "Film A"}},
-    {"13:00 - 15:00", {"Film B", "Film C", "Film D"}},
-    {"15:30 - 17:30", {"Film E", "Film A", "Film B"}},
-    {"18:00 - 20:00", {"Film C", "Film D", "Film E"}},
-    {"20:30 - 22:30", {"Film A", "Film B", "Film C"}}
+    {"08:00 - 10:00", {judulFilm[0], judulFilm[1], judulFilm[3]}},
+    {"10:30 - 12:30", {judulFilm[3], judulFilm[4], judulFilm[0]}},
+    {"13:00 - 15:00", {judulFilm[1], judulFilm[2], judulFilm[3]}},
+    {"15:30 - 17:30", {judulFilm[4], judulFilm[0], judulFilm[1]}},
+    {"18:00 - 20:00", {judulFilm[2], judulFilm[3], judulFilm[4]}},
+    {"20:30 - 22:30", {judulFilm[0], judulFilm[1], judulFilm[2]}}
 };
+
+void cariFilm(JadwalFilm jadwal[], int size) {
+    bool found = false;
+    string keyword;
+
+    cout << "Cari Film\n\n";
+    cout << "Cari : "; cin.ignore(); getline(cin, keyword);
+
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < maksstudio; j++) {
+            if (jadwal[i].film[j].find(keyword) != string::npos) {
+                cout << "\nJudul : " << jadwal[i].film[j] << endl;
+                cout << "Waktu : " << jadwal[i].waktu << endl;
+                found = true;
+            }
+        }
+    }
+
+    if (!found) {
+        cout << "\nFilm tidak ditemukan\n";
+    }
+}
+
+void pesanTiket() {
+    cout << "\nFitur Pesan Tiket Belum Tersedia\n";
+    system("pause");
+}
 
 void tampilkanJadwal() {
     system("cls");
@@ -64,39 +95,12 @@ void tampilkanJadwal() {
     system("pause");
 }
 
-void pesanTiket() {
-    cout << "\nFitur Pesan Tiket Belum Tersedia\n";
-    system("pause");
-}
-
-// void cariFilm(JadwalFilm jadwal[], int size, const string &keyword) {
-//     bool found = false;
-
-//     for (int i = 0; i < size; i++) {
-//         if (jadwal[i].judul.find(keyword) != string::npos) {
-//             cout << "\nFilm ditemukan: \n";
-//             cout << "Judul : " << jadwal[i].judul << endl;
-//             cout << "Harga : " << jadwal[i].harga << endl;
-//             found = true;
-//         }
-//     }
-
-//     if (!found) {
-//         cout << "\nFilm tidak ditemukan\n";
-//     }
-// }
-
 void menuUtama() {
     int pilihan;
-    string keyword;
 
     do {
         system("cls");
         cout << "\n===== Menu Utama Bioskop =====" << endl << endl;
-        // cout << "Cari film (masukkan judul): ";
-        // cin.ignore();
-        // getline(cin, keyword);
-        // cariFilm(jadwal, maksfilm, keyword);
 
         cout << "1. Lihat Jadwal" << endl;
         cout << "2. Pesan Tiket" << endl;
@@ -113,7 +117,7 @@ void menuUtama() {
                 pesanTiket();
                 break;
             case 3:
-
+                cariFilm(jadwal, maksfilm);
             break;
             case 4:
                 cout << "Terima kasih telah menggunakan layanan kami!" << endl;
