@@ -3,51 +3,64 @@
 #include <cstring>
 using namespace std;
 
-const int maksfilm = 3;
-int percobaan = 3;
+const int maksfilm = 6, maksstudio = 3;
 
 struct {
     string nama, usn, pass;
 } staff[100];
 
-struct JadwalFilm {
-    string judul;
-    string jamTayang[3];
-    char studio[3];
+struct Studio {
+    string nama;
     int harga;
 };
 
+struct JadwalFilm {
+    string waktu;
+    string film[maksstudio];
+};
+
+Studio studio[maksstudio] = {
+    {"Studio 1", 40000},
+    {"Studio 2", 50000},
+    {"Studio 3", 60000}
+};
+
 JadwalFilm jadwal[maksfilm] = {
-    {"Perayaan Mati Rasa", {"09.00 - 11.00", "12.30 - 13.30", "11.15 - 12.15"}, {'A', 'B', 'C'}, 50000},
-    {"Petaka Gunung Gede", {"09.00 - 11.00", "11.15 - 12.15", "12.30 - 13.30"}, {'B', 'C', 'A'}, 50000},
-    {"Main America: Brave New", {"09.00 - 11.00", "11.15 - 12.15", "12.30 - 13.30"}, {'C', 'B', 'A'}, 50000}
+    {"08:00 - 10:00", {"Film A", "Film B", "Film C"}},
+    {"10:30 - 12:30", {"Film D", "Film E", "Film A"}},
+    {"13:00 - 15:00", {"Film B", "Film C", "Film D"}},
+    {"15:30 - 17:30", {"Film E", "Film A", "Film B"}},
+    {"18:00 - 20:00", {"Film C", "Film D", "Film E"}},
+    {"20:30 - 22:30", {"Film A", "Film B", "Film C"}}
 };
 
 void tampilkanJadwal() {
     system("cls");
-    cout << "========================================================================================\n";
-    cout << "| " << setw(6) << left << "Kode" 
-         << "| " << setw(30) << left << "Judul"
-         << "| " << setw(15) << left << "Jam Tayang"
-         << "| " << setw(7) << left << "Studio"
-         << "| " << setw(10) << left << "Harga" << "|\n";
-    cout << "========================================================================================\n";
 
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            if (j == 0)
-                cout << "| " << setw(6) << left << i + 1
-                     << "| " << setw(30) << left << jadwal[i].judul;
-            else
-                cout << "| " << setw(6) << " "
-                     << "| " << setw(30) << " ";
-            
-            cout << "| " << setw(15) << left << jadwal[i].jamTayang[j]
-                 << "| " << setw(7) << left << jadwal[i].studio[j]
-                 << "| " << setw(10) << left << jadwal[i].harga << "|\n";
-        }
-        cout << "----------------------------------------------------------------------------------------\n";
+    // Menampilkan judul
+    cout << "Jadwal Film\n\n";
+    cout << left;
+    cout << setw(20) << "Waktu"
+         << setw(20) << studio[0].nama
+         << setw(20) << studio[1].nama 
+         << setw(20) << studio[2].nama << endl;
+    cout << setfill('-') << setw(80) << "" << endl;
+    
+    // Menampilkan Jadwal Film
+    cout << setfill(' ');
+    for (int i = 0; i < maksfilm; i++) {
+        cout << setw(20) << jadwal[i].waktu;
+        cout << setw(20) << jadwal[i].film[0];
+        cout << setw(20) << jadwal[i].film[1];
+        cout << setw(20) << jadwal[i].film[2] << endl;
     }
+
+    cout << "\nHarga Studio:\n";
+    for (int i = 0; i < maksstudio; i++) {
+        cout << studio[i].nama << " Rp. " << studio[i].harga << endl;
+    }
+
+    cout << endl;
     system("pause");
 }
 
@@ -56,24 +69,22 @@ void pesanTiket() {
     system("pause");
 }
 
+// void cariFilm(JadwalFilm jadwal[], int size, const string &keyword) {
+//     bool found = false;
 
+//     for (int i = 0; i < size; i++) {
+//         if (jadwal[i].judul.find(keyword) != string::npos) {
+//             cout << "\nFilm ditemukan: \n";
+//             cout << "Judul : " << jadwal[i].judul << endl;
+//             cout << "Harga : " << jadwal[i].harga << endl;
+//             found = true;
+//         }
+//     }
 
-void cariFilm(JadwalFilm jadwal[], int size, const string &keyword) {
-    bool found = false;
-
-    for (int i = 0; i < size; i++) {
-        if (jadwal[i].judul.find(keyword) != string::npos) {
-            cout << "\nFilm ditemukan: \n";
-            cout << "Judul : " << jadwal[i].judul << endl;
-            cout << "Harga : " << jadwal[i].harga << endl;
-            found = true;
-        }
-    }
-
-    if (!found) {
-        cout << "\nFilm tidak ditemukan\n";
-    }
-}
+//     if (!found) {
+//         cout << "\nFilm tidak ditemukan\n";
+//     }
+// }
 
 void menuUtama() {
     int pilihan;
@@ -87,11 +98,11 @@ void menuUtama() {
         // getline(cin, keyword);
         // cariFilm(jadwal, maksfilm, keyword);
 
-        cout << "1. Lihat Jadwal Film" << endl;
+        cout << "1. Lihat Jadwal" << endl;
         cout << "2. Pesan Tiket" << endl;
         cout << "3. Cari Film" << endl;
         cout << "4. Keluar" << endl;
-        cout << "Pilih menu (1-3): ";
+        cout << "Pilih menu : ";
         cin >> pilihan;
 
         switch (pilihan) {
