@@ -68,8 +68,9 @@ int cekN(int &j, int k){
 
 void updateJadwal(){
     for (int i = 0; i < 5; i++){
-        currentFilm[i] = dataFilm[jmlFilm];
-        jmlFilm--;
+        for (int j = 4 - i; j == jmlFilm - i; j--){
+            currentFilm[i] = dataFilm[jmlFilm];
+        }
     }
 
     int j = 0;
@@ -89,9 +90,9 @@ void hapusFilm(){
         ulangHapus = 0;
         cout << "Hapus Film\n\n";
         for (int i = 0; i < jmlFilm + 1; i++){
-            cout << i + 1 << ". " << dataFilm[i].judul;
+            cout << i + 1 << ". " << dataFilm[i].judul << endl;
         }
-        cout << "\n\nPilih film yang di hapus: "; cin >> kodeHapus;
+        cout << "\nPilih film yang di hapus: "; cin >> kodeHapus;
 
         if (kodeHapus < 0 || kodeHapus > jmlFilm + 1){
             cout << "Kode tidak valid" << endl;
@@ -132,9 +133,9 @@ void editFilm(){
         ulangEdit = 0;
         cout << "Edit Film\n\n";
         for (int i = 0; i < 5; i++){
-            cout << i + 1 << ". " << currentFilm[i].judul;
+            cout << i + 1 << ". " << currentFilm[i].judul << endl;
         }
-        cout << "\n\nPilih film yang di edit: "; cin >> kodeEdit;
+        cout << "\nPilih film yang di edit: "; cin >> kodeEdit;
         
         if (kodeEdit < 0 || kodeEdit > 5){
             cout << "Kode tidak valid" << endl;
@@ -194,7 +195,11 @@ void menuEdit(){
                 tambahFilm();
             break;
             case 3:
-                hapusFilm();
+                if (jmlFilm < 5){
+                    cout << "\nHarus ada lebih dari 5 film untuk hapus film\n"; system("pause");
+                }else{
+                    hapusFilm();
+                }
             break;
             case 4:
                 ulangEdit = 0;
