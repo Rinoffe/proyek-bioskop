@@ -66,15 +66,15 @@ int cekN(int &j, int k){
     }
 }
 
-void updateJadwal(){
-    for (int i = 0; i < 5; i++){
-        for (int j = 4 - i; j == jmlFilm - i; j--){
-            currentFilm[i] = dataFilm[jmlFilm];
-        }
+void updateJadwal() {
+    // Initialize currentFilm with the last 5 films from dataFilm
+    int startIndex = max(0, jmlFilm - 4); // Ensure we don't go negative
+    for (int i = 0; i < 5 && (startIndex + i) <= jmlFilm; i++) {
+        currentFilm[i] = dataFilm[startIndex + i];
     }
 
     int j = 0;
-    for (int i = 0; i < maksfilm; i++){
+    for (int i = 0; i < maksfilm; i++) {
         jadwal[i].film[0] = currentFilm[cekN(j, 0)].judul;
         jadwal[i].film[1] = currentFilm[cekN(j, 1)].judul;
         jadwal[i].film[2] = currentFilm[cekN(j, 2)].judul;
@@ -247,7 +247,7 @@ void sortNama(int kodeSort){
         cout << "Nama Ascending\n\n";
         for (int i = 0; i < 4; i++){
             for (int j = 0; j < 4 - i; j++){
-                if (currentFilm[j].judul[0] > currentFilm[j + 1].judul[0]){
+                if (currentFilm[j].judul > currentFilm[j + 1].judul){
                     swap(currentFilm[j], currentFilm[j + 1]);
                 }
             }
@@ -256,7 +256,7 @@ void sortNama(int kodeSort){
         cout << "Nama Descending\n\n";
         for (int i = 0; i < 4; i++){
             for (int j = 0; j < 4 - i; j++){
-                if (currentFilm[j].judul[0] < currentFilm[j + 1].judul[0]){
+                if (currentFilm[j].judul < currentFilm[j + 1].judul){
                     swap(currentFilm[j], currentFilm[j + 1]);
                 }
             }
