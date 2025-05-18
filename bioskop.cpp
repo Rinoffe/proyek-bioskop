@@ -1,185 +1,210 @@
 #include <iostream>
-#include <iomanip>
 #include <cstring>
+#include <string>
+#include <iomanip>
 using namespace std;
 
-const int maksfilm = 6, maksstudio = 3;
-
-struct film{
-    string judul, rating, genre;
-    float durasi;
-    string sutradara, pemain, sinopsis;
-};
-
-film dataFilm[] = {
-    {"bFilm 1", "Umum", "Action", 2, "Sutradara 1", "Pemain 1, Pemain 2", "Sinopsis 1"},
-    {"eFilm 2", "Umum", "Action", 1, "Sutradara 2", "Pemain 1, Pemain 2", "Sinopsis 2"},
-    {"aFilm 3", "Umum", "Action", 1.3, "Sutradara 3", "Pemain 1, Pemain 2", "Sinopsis 3"},
-    {"cFilm 4", "Umum", "Action", 1.5, "Sutradara 4", "Pemain 1, Pemain 2", "Sinopsis 4"},
-    {"dFilm 5", "Umum", "Action", 3, "Sutradara 5", "Pemain 1, Pemain 2", "Sinopsis 5"}
-};
-int jmlFilm = 4; //film tersimpan, dpt berubah
-
-film currentFilm[5];
+const int maxFilm = 20, maxCurrent = 5, maxStudio = 3, maxStaff = 50, maxShowtimes = 10;
+const int rows = 6, cols = 8;
 
 struct {
     string nama, usn, pass;
-} staff[100];
+} staff[maxStaff];
 
-struct Studio {
+struct film{
+    string judul, rating, genre;
+    int durasi;
+};
+
+film dataFilm[maxFilm] = {
+    {"bFilm 1", "Umum", "Action", 180},
+    {"eFilm 2", "Umum", "Action", 150},
+    {"aFilm 3", "Umum", "Action", 120},
+    {"cFilm 4", "Umum", "Action", 90},
+    {"dFilm 5", "Umum", "Action", 60}
+};
+int jmlFilm = 4;
+
+film currentFilm[maxCurrent];
+
+struct seats{
+    string seatsDisplay[10][10];
+};
+
+struct jadwal{
+    string judul, startTime[maxShowtimes];
+    seats seats[maxShowtimes];
+};
+
+struct studio {
     string nama;
     int harga;
+    jadwal dataJadwal[maxCurrent];
 };
 
-Studio studio[maksstudio] = {
-    {"Studio 1", 40000},
-    {"Studio 2", 50000},
-    {"Studio 3", 60000}
+studio dataStudio[maxStudio] = {
+    {"Dolby Atmos", 55000},
+    {"Premium", 45000},
+    {"Standar", 35000}
 };
 
-struct JadwalFilm {
-    string waktu;
-    string film[maksstudio];
-};
+struct penonton{
+    string baris[rows * cols], kolom[rows * cols];
+} dataPenonton[100];
 
-JadwalFilm jadwal[maksfilm] = {
-    {"08:00 - 10:00"},
-    {"10:30 - 12:30"},
-    {"13:00 - 15:00"},
-    {"15:30 - 17:30"},
-    {"18:00 - 20:00"},
-    {"20:30 - 22:30"}
-};
+int seatSold = 0, jmlPenonton = 0;
+bool jadwalChange;
 
-int cekN(int &j, int k){
-    switch (k){
-        case 0:
-            return j;
-        break;
-        case 1:
-            if (j + 1 > 4) return j = 0;
-            else return j = j + 1;
-        break;
-        case 2:
-            if (j + 1 > 4) return 0;
-            else return j + 1;
+string countTime(int index, int &hour, int &minute){
+    int durasiBreak = 30;    
+    string time = to_string(hour) + ":" + (minute < 10 ? "0" : "") + to_string(minute);
+
+    minute += currentFilm[index].durasi + durasiBreak;
+    while (minute >= 60){
+        minute -= 60;
+        hour++;
     }
+    return time;
 }
 
-void updateJadwal() {
-    // Initialize currentFilm with the last 5 films from dataFilm
-    int startIndex = max(0, jmlFilm - 4); // Ensure we don't go negative
-    for (int i = 0; i < 5 && (startIndex + i) <= jmlFilm; i++) {
-        currentFilm[i] = dataFilm[startIndex + i];
+void updateJadwal(){
+    for (int i = 0; i < maxCurrent; i++){
+        currentFilm[i] = dataFilm[jmlFilm - i];
     }
 
-    int j = 0;
-    for (int i = 0; i < maksfilm; i++) {
-        jadwal[i].film[0] = currentFilm[cekN(j, 0)].judul;
-        jadwal[i].film[1] = currentFilm[cekN(j, 1)].judul;
-        jadwal[i].film[2] = currentFilm[cekN(j, 2)].judul;
+    for (int i = 0; i < maxStudio; i++){
+        int hour = 10, minute = 0;
+        int filmIndex = i, cycle = 0;
+
+        while (true){
+            int index = filmIndex % maxCurrent;
+            jadwal *ptrStudio = &dataStudio[i].dataJadwal[index];
+
+            ptrStudio->judul = currentFilm[index].judul;
+            ptrStudio->startTime[cycle] = countTime(index, hour, minute);
+
+            filmIndex++;
+            if (index == maxCurrent - 1) cycle++;
+            if (hour > 21) break;
+        }
     }
 }
 
 void hapusFilm(){
-    system("cls");
     int kodeHapus;
-    bool ulangHapus;
+    bool ulangHapus = 1;
+    film *ptrFilm = dataFilm;
 
-    do{
-        ulangHapus = 0;
+    while (ulangHapus){
+        system("cls");
         cout << "Hapus Film\n\n";
+
         for (int i = 0; i < jmlFilm + 1; i++){
-            cout << i + 1 << ". " << dataFilm[i].judul << endl;
+            cout << i + 1 << ". " << (ptrFilm + i)->judul << endl;
         }
-        cout << "\nPilih film yang di hapus: "; cin >> kodeHapus;
+        cout << jmlFilm + 2 << ". Keluar\n";
+        cout << "\nPilih menu : "; cin >> kodeHapus;
 
-        if (kodeHapus < 0 || kodeHapus > jmlFilm + 1){
-            cout << "Kode tidak valid" << endl;
-            ulangHapus = 1;
+        if (kodeHapus < 0 || kodeHapus > jmlFilm + 2){
+            cout << "\nKode tidak valid" << endl;
             system("pause"); system("cls");
+        }else if (kodeHapus == jmlFilm + 2){
+            ulangHapus = 0;
         }else{
-            jmlFilm--;
-            for (int i = kodeHapus - 1; i < jmlFilm + 1; i++){
-                dataFilm[i] = dataFilm[i + 1];
+            film *start = &dataFilm[kodeHapus - 1];
+            for (int i = 0; i < jmlFilm - kodeHapus + 1; i++){
+                *(start + i) = *(start + i + 1);
             }
+            jmlFilm--;
+            cout << "\nFilm telah dihapus\n"; system("pause");
+            if (kodeHapus > 5) jadwalChange = 1;
         }
-
-    }while (ulangHapus);
+    }
 }
 
 void tambahFilm(){
-    string judul;
     jmlFilm++;
+    film *ptrFilm = &dataFilm[jmlFilm];
+
+    if (jmlFilm >= maxFilm) {
+        cout << "\nKapasitas film penuh!\n";
+        system("pause");
+        return;
+    }
+    
     system("cls");
     cout << "Tambah Film\n\n";
-    cout << "Judul Film : "; cin.ignore(); getline(cin, dataFilm[jmlFilm].judul);
-    cout << "Rating     : "; cin >> dataFilm[jmlFilm].rating;
-    cout << "Genre      : "; cin.ignore(); getline(cin, dataFilm[jmlFilm].genre);
-    cout << "Durasi     : "; cin >> dataFilm[jmlFilm].durasi;
-    cout << "Sutradara  : "; cin.ignore(); getline(cin, dataFilm[jmlFilm].sutradara);
-    cout << "Pemain     : "; cin.ignore(); getline(cin, dataFilm[jmlFilm].pemain);
-    cout << "Sinopsis   : "; cin.ignore(); getline(cin, dataFilm[jmlFilm].sinopsis);
+    cout << "Judul Film     : "; cin.ignore(); getline(cin, ptrFilm->judul);
+    cout << "Rating         : "; cin >> ptrFilm->rating;
+    cout << "Genre          : "; cin.ignore(); getline(cin, ptrFilm->genre);
+    cout << "Durasi (menit) : "; cin >> ptrFilm->durasi;
     cout << "\nFilm berhasil ditambahkan\n";
-    system("pause");
+    system("pause"); jadwalChange = 1;
 }
 
 void editFilm(){
     int kodeEdit;
-    bool ulangEdit;
-    system("cls");
+    bool ulangEdit = 1;
+    film *ptrCurrent = currentFilm;
 
-    do{
-        ulangEdit = 0;
+    while (ulangEdit){
+        system("cls");
         cout << "Edit Film\n\n";
-        for (int i = 0; i < 5; i++){
-            cout << i + 1 << ". " << currentFilm[i].judul << endl;
+
+        for (int i = 0; i < maxCurrent; i++){
+            cout << i + 1 << ". " << (ptrCurrent + i)->judul << endl;
         }
+        cout << maxCurrent + 1 << ". Keluar\n";
         cout << "\nPilih film yang di edit: "; cin >> kodeEdit;
         
-        if (kodeEdit < 0 || kodeEdit > 5){
-            cout << "Kode tidak valid" << endl;
-            ulangEdit = 1;
+        if (kodeEdit < 0 || kodeEdit > 6){
+            cout << "\nKode tidak valid" << endl;
             system("pause"); system("cls");
+        }else if (kodeEdit == 6){
+            ulangEdit = 0;
         }else{
+            
             int pilihEdit;
             bool ulangPilih = 1;
 
             while (ulangPilih){
                 system("cls");
-                cout << "\nJudul : " << dataFilm[(jmlFilm+1) - kodeEdit].judul << endl << endl;
-                cout << "[1] Edit Judul\n"
-                     << "[2] Keluar\n";
-                cout << "Pilih Edit : "; cin >> pilihEdit;
+                film* ptrEdit = &dataFilm[(jmlFilm + 1) - kodeEdit];
+
+                cout << "[1] Judul  : " << ptrEdit->judul
+                     << "\n[2] Rating : " << ptrEdit->rating
+                     << "\n[3] Genre  : " << ptrEdit->genre
+                     << "\n[4] Durasi : " << ptrEdit->durasi
+                     << "\n[5] Keluar\n\n";
+                cout << "Pilih Edit : "; cin >> pilihEdit; cin.ignore();
+                
                 switch (pilihEdit){
-                    case 1:
-                        cout << "\nJudul baru : "; cin.ignore(); getline(cin, dataFilm[(jmlFilm+1) - kodeEdit].judul);
-                    break;
-                    case 2:
-                        ulangPilih = 0;
-                    break;
+                    case 1: cout << "\nJudul baru : "; getline(cin, ptrEdit->judul); break;
+                    case 2: cout << "\nRating baru : "; getline(cin, ptrEdit->rating); break;
+                    case 3: cout << "\nGenre baru : "; getline(cin, ptrEdit->genre); break;
+                    case 4: cout << "\nDurasi baru (menit) : "; cin >> ptrEdit->durasi; break;
+                    case 5: ulangPilih = 0; break;
                     default:
                         cout << "Kode tidak valid" << endl;
                         system("pause");
                 }
             }
         }
-    }while (ulangEdit);
+    }
 }
 
 void menuEdit(){
     int kodeEdit;
     bool ulangEdit = 1;
-    
-    system("cls");
-    do{
+        
+    while (ulangEdit){
+        system("cls");
         updateJadwal();
         cout << "Edit Informasi Jadwal\n\n";
         cout << "PERHATIAN!\n"
-             << "1. Bioskop hanya bisa menampilkan 5 film dalam 1 hari\n"
-             << "2. Jika film baru ditambahkan maka film lama tidak akan ditayangkan lagi\n"
-             << "3. Data film yang sudah tidak ditayangkan masih tersimpan kecuali dihapus\n"
-             << "4. Hapus dan edit film dengan seksama\n\n";
+             << "# Bioskop hanya menampilkan " << maxCurrent << " film terbaru\n"
+             << "# Jika tambah film baru maka film terlama tidak akan ditayangkan\n"
+             << "# Data film lama masih disimpan kecuali dihapus\n\n";
              
         cout << "[1] Edit Film\n"
              << "[2] Tambah Film\n"
@@ -188,84 +213,47 @@ void menuEdit(){
         cout << "Pilih kode : "; cin >> kodeEdit;
         
         switch (kodeEdit){
-            case 1:
-                editFilm();
-            break;
-            case 2:
-                tambahFilm();
-            break;
+            case 1: editFilm(); break;
+            case 2: tambahFilm(); break;
             case 3:
-                if (jmlFilm < 5){
-                    cout << "\nHarus ada lebih dari 5 film untuk hapus film\n"; system("pause");
+                if (jmlFilm < maxCurrent){
+                    cout << "\nHarus ada lebih dari " << maxCurrent << " film untuk hapus film\n";
+                    system("pause");
                 }else{
                     hapusFilm();
                 }
             break;
-            case 4:
-                ulangEdit = 0;
-            break;
+            case 4: ulangEdit = 0; break;
             default:
                 cout << "Kode menu tidak valid" << endl;
                 system("pause");
         }
-        system("cls");
-    }while (ulangEdit);
+    }
 }
 
-void sortDurasi(int kodeSort){
+void sortJadwal(int kodeSort, int kondisi){
     system("cls");
-    if (kodeSort == 3){
-        cout << "Durasi Ascending\n\n";
-        for (int i = 0; i < 4; i++){
-            for (int j = 0; j < 4 - i; j++){
-                if (currentFilm[j].durasi > currentFilm[j + 1].durasi){
-                    swap(currentFilm[j], currentFilm[j + 1]);
-                }
-            }
-        }
-    }else{
-        cout << "Durasi Descending\n\n";
-        for (int i = 0; i < 4; i++){
-            for (int j = 0; j < 4 - i; j++){
-                if (currentFilm[j].durasi < currentFilm[j + 1].durasi){
-                    swap(currentFilm[j], currentFilm[j + 1]);
-                }
-            }
-        }
-    }
-    
-    for (int i = 0; i < 5; i++){
-        cout << i + 1 << ". " << currentFilm[i].judul << endl;
-        cout << "   Durasi : " << currentFilm[i].durasi << " jam" << endl;
-    }
-    system("pause");
-}
+    film *ptrSort = currentFilm;
+    bool tukar;    
+        
+    for (int i = 0; i < maxCurrent - 1; i++){
+        for (int j = 0; j < maxCurrent - 1 - i; j++){
+            if (kodeSort == 1) tukar = kondisi ?
+                ((ptrSort + j)->judul > (ptrSort + j + 1)->judul) :
+                ((ptrSort + j)->judul < (ptrSort + j + 1)->judul);
+            else tukar = kondisi ?
+                ((ptrSort + j)->durasi > (ptrSort + j + 1)->durasi) :
+                ((ptrSort + j)->durasi < (ptrSort + j + 1)->durasi);
 
-void sortNama(int kodeSort){
-    system("cls");
-    if (kodeSort == 1){
-        cout << "Nama Ascending\n\n";
-        for (int i = 0; i < 4; i++){
-            for (int j = 0; j < 4 - i; j++){
-                if (currentFilm[j].judul > currentFilm[j + 1].judul){
-                    swap(currentFilm[j], currentFilm[j + 1]);
-                }
-            }
+            if (tukar) swap(*(ptrSort + j), *(ptrSort + j + 1));
         }
-    }else{
-        cout << "Nama Descending\n\n";
-        for (int i = 0; i < 4; i++){
-            for (int j = 0; j < 4 - i; j++){
-                if (currentFilm[j].judul < currentFilm[j + 1].judul){
-                    swap(currentFilm[j], currentFilm[j + 1]);
-                }
-            }
-        }
-    }
-    
-    for (int i = 0; i < 5; i++){
-        cout << i + 1 << ". " << currentFilm[i].judul << endl;
-    }
+    }    
+    for (int i = 0; i < maxCurrent; i++) {
+        cout << i + 1 << ". " << (ptrSort + i)->judul;
+        if (kodeSort == 2) cout << " - " << (ptrSort + i)->durasi << " menit";
+        cout << endl;
+    }    
+    cout << endl;
     system("pause");
 }
 
@@ -273,7 +261,7 @@ void menuSort(){
     int kodeSort;
     bool ulangSort = 1;
 
-    do{
+    while (ulangSort){
         system("cls");
         updateJadwal();
         cout << "Sort Film\n\n";
@@ -282,56 +270,47 @@ void menuSort(){
              << "[3] Durasi Ascending\n"
              << "[4] Durasi Descending\n"
              << "[5] Keluar\n";
-        cout << "Pilih menu : "; cin >> kodeSort;
+        cout << "\nPilih menu : "; cin >> kodeSort;
 
         switch(kodeSort){
-            case 1:
-                sortNama(kodeSort);
-            break;
-            case 2:
-                sortNama(kodeSort);
-            break;
-            case 3:
-                sortDurasi(kodeSort);
-            break;
-            case 4:
-                sortDurasi(kodeSort);
-            break;
-            case 5:
-                ulangSort = 0;
-            break;
+            case 1: sortJadwal(1, 1); break;
+            case 2: sortJadwal(1, 0); break;
+            case 3: sortJadwal(2, 1); break;
+            case 4: sortJadwal(2, 0); break;
+            case 5: ulangSort = 0; break;
             default:
                 cout << "Kode menu tidak valid" << endl;
                 system("pause");
         }
-        system("cls");
-
-    } while(ulangSort);
+    }
 }
 
 void cariFilm() {
-    bool found = false;
+    bool found = 0;
     string keyword;
-    
+
     system("cls");
     cout << "Cari Film\n\n";
     cout << "Cari : "; cin.ignore(); getline(cin, keyword);
 
-    for (int i = 0; i < 5; i++){
-        if (currentFilm[i].judul.find(keyword) != string::npos){
-                        cout << "\nJudul      : " << currentFilm[i].judul << endl;
-                        cout << "Rating     : " << currentFilm[i].rating << endl;
-                        cout << "Genre      : " << currentFilm[i].genre << endl;
-                        cout << "Durasi     : " << currentFilm[i].durasi << " jam" << endl;
-                        cout << "Sutradara  : " << currentFilm[i].sutradara << endl;
-                        cout << "Pemain     : " << currentFilm[i].pemain << endl;
-                        cout << "Sinopsis   : " << currentFilm[i].sinopsis << endl;
-                        cout << "Jam Tayang : "  << endl;
-            for (int j = 0; j < maksfilm; j++) {
-                for (int k = 0; k < maksstudio; k++) {
-                    if (jadwal[j].film[k] == currentFilm[i].judul) {
-                        cout << studio[k].nama << " (Rp. " << studio[k].harga << ") : " << jadwal[j].waktu << endl;
-                        found = true;
+    for (int i = 0; i < maxCurrent; i++){
+        film *currentPtr = &currentFilm[i];
+        if (currentPtr->judul.find(keyword) != string::npos){
+            cout << "\nJudul      : " << currentPtr->judul << endl;
+            cout << "Rating     : " << currentPtr->rating << endl;
+            cout << "Genre      : " << currentPtr->genre << endl;
+            cout << "Durasi     : " << currentPtr->durasi << " menit" << endl;
+            cout << "Jam Tayang : ";
+
+            for (int i = 0; i < maxStudio; i++){
+                for (int j = 0; j < maxShowtimes; j++){
+                    if (currentPtr->judul == dataStudio[i].dataJadwal[j].judul){
+                        for (int k = 0; k < maxShowtimes; k++){
+                            if (!dataStudio[i].dataJadwal[j].startTime[k].empty()){
+                                cout << dataStudio[i].dataJadwal[j].startTime[k] << " ";
+                                found = 1;
+                            }
+                        }
                     }
                 }
             }
@@ -341,85 +320,219 @@ void cariFilm() {
     if (!found) {
         cout << "\nFilm tidak ditemukan";
     }
-    cout <<  endl;
+    cout << endl << endl;
     system("pause");
 }
 
-void pesanTiket() {
-    cout << "\nFitur Pesan Tiket Belum Tersedia\n";
-    system("pause");
-}
-
-void tampilkanJadwal() {
+void displayJadwal(){
     system("cls");
-    
     cout << "Jadwal Film\n\n";
-    cout << left;
-    cout << setw(20) << "Waktu"
-         << setw(20) << studio[0].nama
-         << setw(20) << studio[1].nama 
-         << setw(20) << studio[2].nama << endl;
-    cout << setfill('-') << setw(80) << "" << endl;
-    
-    cout << setfill(' ');
-    for (int i = 0; i < maksfilm; i++) {
-        cout << setw(20) << jadwal[i].waktu;
-        cout << setw(20) << jadwal[i].film[0];
-        cout << setw(20) << jadwal[i].film[1];
-        cout << setw(20) << jadwal[i].film[2] << endl;
-    }
 
-    cout << "\nHarga Studio:\n";
-    for (int i = 0; i < maksstudio; i++) {
-        cout << studio[i].nama << " Rp. " << studio[i].harga << endl;
-    }
+    for (int i = 0; i < maxStudio; i++){
+        int hour = 10, minute = 0;
+        int filmIndex = i, cycle = 0;
 
-    cout << endl;
+        cout << "+" << setfill('-') << setw(60) << "" << "+" << endl;
+        cout << left << setfill(' ');
+        cout << "| " << dataStudio[i].nama << " (Rp. " << dataStudio[i].harga
+             << setw(47 - dataStudio[i].nama.length()) << ")" << " |" << endl;
+        cout << "+" << setfill('-') << setw(60) << "" << "+" << endl;
+
+        while (true){
+            int index = filmIndex % maxCurrent;
+            jadwal *ptrStudio = &dataStudio[i].dataJadwal[index];
+            countTime(index, hour, minute);
+
+            cout << setfill(' ');
+            cout << "| " << ptrStudio->startTime[cycle] << " - " << setw(50) << ptrStudio->judul << " |\n";
+
+            filmIndex++;
+            if (index == maxCurrent - 1) cycle++;
+            if (hour > 21) break;
+        }
+        cout << "+" << setfill('-') << setw(60) << "" << "+\n";
+    }
+}
+
+void cetakTiket(int studio, int film, int tayang){
+    system ("cls");
+    int baris, kolom;
+    penonton *ptrPenonton = &dataPenonton[jmlPenonton - 1];
+
+    cout << "Selamat menikmati film!\n\n";
+    for (int i = 0; i < rows * cols; i++){
+        if (!ptrPenonton->baris[i].empty()){
+
+            cout << "+" << setfill('-') << setw(65) << "" << "+" << endl;
+            cout << left << setfill(' ');
+            cout << setw(65) << "| Bioskop X " << " |";
+            cout << "\n| Film       : " << setw(50) << dataStudio[studio].dataJadwal[film].judul << " |"
+                << "\n| Jam Tayang : " << setw(50) << dataStudio[studio].dataJadwal[film].startTime[tayang] << " |"
+                << "\n| Studio     : " << setw(50) << dataStudio[studio].nama << " |"
+                << "\n| Seat       : " << ptrPenonton->baris[i] << " " << setw(48) << ptrPenonton->kolom[i] << " |"
+                << "\n| Price      : " << setw(50) << dataStudio[studio].harga << " |\n";
+            cout << "+" << setfill('-') << setw(65) << "" << "+" << endl;
+        }
+    }
     system("pause");
+}
+
+void displaySeats(int studio, int film, int tayang){
+    system("cls");
+    char ulangPilih;
+    bool kosong = 0;
+    seats *ptrSeats = &dataStudio[studio].dataJadwal[film].seats[tayang];
+
+    if (ptrSeats->seatsDisplay[0][0] == "" || jadwalChange) kosong = 1; jadwalChange = 0;
+    if (kosong){
+        for (int i = 0; i < rows; i++){
+            for (int j = 0; j < cols; j++){
+                ptrSeats->seatsDisplay[i][j] = "|   ";
+            }
+        }
+    }
+    cout << "Kursi ruang " << dataStudio[studio].nama << endl << endl;
+
+    cout << "    ";
+    for (int i = 0; i < cols; i++){
+        cout << "  " << i + 1 << " ";
+    }
+    cout << "\n\n    " << setfill('-') << setw(cols * 4 + 1) << "" << endl;
+    for (int i = rows; i > 0; i--){
+        cout << i << (i > 9 ? "  " : "   ");
+
+        for (int j = 0; j < cols; j++){
+            cout << ptrSeats->seatsDisplay[i - 1][j];
+        }
+        cout << "|" << endl;
+        cout << "    " << setfill('-') << setw(cols * 4 + 1) << "" << endl;
+    }
+    cout << "    " << setfill(' ') << setw((cols * 4 + 1) / 2 - 4) << "" << "/ Layar /" << endl;
+}
+
+void setSeats(int studio, int film, int tayang){
+    int baris, kolom, kodeSeats, indexSeat = 0, tempSeat = seatSold;
+    bool ulangSeats = 1;
+    seats *ptrSeats = &dataStudio[studio].dataJadwal[film].seats[tayang];
+    penonton *ptrPenonton = &dataPenonton[jmlPenonton];
+
+    while (ulangSeats){
+        displaySeats(studio, film, tayang);
+        cout << "\n[1] Tambah kursi"
+             << "\n[2] Hapus kursi"
+             << "\n[3] Hapus semua"
+             << "\n[4] Keluar\n\n";
+        cout << "Pilih menu: "; cin >> kodeSeats;
+
+        switch (kodeSeats){
+            case 1:
+                displaySeats(studio, film, tayang);
+                cout << "\nInput baris & kolom (contoh: 5 7)\n";
+                cout << "Pilih kursi : "; cin >> baris >> kolom;
+
+                if (ptrSeats->seatsDisplay[baris - 1][kolom - 1] == "| X "){
+                    cout << "\nKursi sudah terpakai\n\n";
+                    system("pause");
+                }else{
+                    ptrSeats->seatsDisplay[baris - 1][kolom - 1] = "| X ";
+                    ptrPenonton->baris[indexSeat] = to_string(baris); ptrPenonton->kolom[indexSeat] = to_string(kolom);
+                    seatSold++; indexSeat++;
+                }
+            break;
+            case 2:
+                displaySeats(studio, film, tayang);
+                cout << "\nHapus kursi (contoh: 5 7): "; cin >> baris >> kolom;
+                if (ptrSeats->seatsDisplay[baris - 1][kolom - 1] == "|   "){
+                    cout << "\nKursi sudah kosong\n\n";
+                    system("pause");
+                }else{
+                    ptrSeats->seatsDisplay[baris - 1][kolom - 1] = "|   ";
+                    for (int i = 0; i < rows * cols; i++){
+                        if (ptrPenonton->baris[i] == to_string(baris) && ptrPenonton->kolom[i] == to_string(kolom))
+                            ptrPenonton->baris[i] = ""; ptrPenonton->kolom[i] = "";
+                    }
+                    seatSold--; indexSeat--;
+                }
+            break;
+            case 3:
+                for (int i = 0; i < rows; i++){
+                    for (int j = 0; j < cols; j++){
+                        ptrSeats->seatsDisplay[i][j] = "|   ";
+                    }
+                }
+            break;
+            case 4:
+                ulangSeats = 0; system("cls");
+            break;
+            default:
+                cout << "Kode menu tidak valid" << endl;
+                system("pause");
+            }
+    }
+
+    if (tempSeat < seatSold){
+        jmlPenonton++;
+        cetakTiket(studio, film, tayang);
+    }
+}
+
+void pilihJadwal() {
+    system("cls");
+    int studio, film, tayang, count = 1;
+
+    cout << "Studio\n";
+    for (int i = 0; i < maxStudio; i++){
+        cout << i + 1 << ". " << dataStudio[i].nama << endl;
+    }
+    cout << "\nPilih Studio : "; cin >> studio;
+
+    system("cls"); cout << "Film\n";
+    for (int i = 0; i < maxCurrent; i++){
+        cout << i + 1 << ". " << dataStudio[studio - 1].dataJadwal[i].judul << endl;
+    }
+    cout << "\nPilih Film : "; cin >> film;    
+
+    system("cls"); cout << "Jam Tayang\n";    
+    for (int i = 0; i < maxShowtimes; i++){
+        if (!dataStudio[studio - 1].dataJadwal[film - 1].startTime[i].empty()){
+            cout << count << ". " << dataStudio[studio - 1].dataJadwal[film - 1].startTime[i] << endl;
+            count++;
+        }
+    }
+    cout << "\nKode Jam Tayang : "; cin >> tayang;
+    
+    setSeats(studio - 1, film - 1, tayang - 1);    
 }
 
 void menuUtama() {
     int kodeMenu;
     bool ulangUtama = 1;
 
-    system("cls");
-    do {
+    while (ulangUtama){
+        system("cls");
         updateJadwal();
         cout << "\nMenu Utama\n\n";
 
-        cout << "1. Lihat Jadwal" << endl;
-        cout << "2. Pesan Tiket" << endl;
-        cout << "3. Cari Film" << endl;
-        cout << "4. Sort Film" << endl;
-        cout << "5. Edit Film" << endl;
-        cout << "6. Keluar" << endl;
-        cout << "Pilih menu : "; cin >> kodeMenu;
+        cout << "[1] Lihat Jadwal" << endl;
+        cout << "[2] Cetak Tiket" << endl;
+        cout << "[3] Cari Film" << endl;
+        cout << "[4] Sort Film" << endl;
+        cout << "[5] Edit Film" << endl;
+        cout << "[6] Keluar" << endl;
+        cout << "\nPilih menu : "; cin >> kodeMenu;
 
         switch (kodeMenu) {
-            case 1:
-                tampilkanJadwal();
-            break;
-            case 2:
-                pesanTiket();
-            break;
-            case 3:
-                cariFilm();
-            break;
-            case 4:
-                menuSort();
-            break;
-            case 5:
-                menuEdit();
-            break;
-            case 6:
-                ulangUtama = 0;
-            break;
+            case 1: displayJadwal(); system("pause"); break;
+            case 2: pilihJadwal(); break;
+            case 3: cariFilm(); break;
+            case 4: menuSort(); break;
+            case 5: menuEdit(); break;
+            case 6: ulangUtama = 0; break;
             default:
                 cout << "Kode menu tidak valid" << endl;
                 system("pause");
         }
-        system("cls");
-    } while (ulangUtama);
+    }
 }
 
 void login(int daftar, bool &ulangMasuk, int limitLogin){
@@ -474,7 +587,7 @@ void signup(int &daftar) {
 }
 
 void masuk(int &daftar) {
-    int kodeMasuk, limitLogin = 3;
+    int kodeMasuk, limitLogin = 5;
     bool ulangMasuk = 1;
 
     while (ulangMasuk) {
@@ -499,12 +612,11 @@ void masuk(int &daftar) {
             break;
             case 3:
                 ulangMasuk = 0;
-                break;
+            break;
             default:
                 cout << "Kode tidak valid\n";
                 system("pause");
         }
-        system("cls");
     }
 }
 
