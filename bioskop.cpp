@@ -55,50 +55,34 @@ struct penonton{
 } dataPenonton;
 
 void splitFileDataJadwal(string line){
-    string nama, judul, tayang, display, baris, kolom;
     stringstream ss(line);
 
-    getline(ss, nama, ',');
-    getline(ss, judul, ',');
-    getline(ss, tayang, ',');
-    getline(ss, display, ',');
-    getline(ss, baris, ',');
-    getline(ss, kolom);
-
-    tempDataStudio.nama = nama;
-    tempDataStudio.judul = judul;
-    tempDataStudio.tayang = tayang;
-    tempDataStudio.display = display;
-    tempDataStudio.baris = baris;
-    tempDataStudio.kolom = kolom;
+    getline(ss, tempDataStudio.nama, ',');
+    getline(ss, tempDataStudio.judul, ',');
+    getline(ss, tempDataStudio.tayang, ',');
+    getline(ss, tempDataStudio.display, ',');
+    getline(ss, tempDataStudio.baris, ',');
+    getline(ss, tempDataStudio.kolom);
 }
 
 void splitFileDataFilm(string line){
-    string judul, rating, genre, durasi;
+    string durasi;
     stringstream ss(line);
 
-    getline(ss, judul, ',');
-    getline(ss, rating, ',');
-    getline(ss, genre, ',');
+    getline(ss, dataFilm.judul, ',');
+    getline(ss, dataFilm.rating, ',');
+    getline(ss, dataFilm.genre, ',');
     getline(ss, durasi);
 
-    dataFilm.judul = judul;
-    dataFilm.rating = rating;
-    dataFilm.genre = genre;
     dataFilm.durasi = stoi(durasi);
 }
 
 void splitFileDataStaff(string line){
-    string nama, usn, pass;
     stringstream ss(line);
 
-    getline(ss, nama, ',');
-    getline(ss, usn, ',');
-    getline(ss, pass);
-
-    dataStaff.nama = nama;
-    dataStaff.usn = usn;
-    dataStaff.pass = pass;
+    getline(ss, dataStaff.nama, ',');
+    getline(ss, dataStaff.usn, ',');
+    getline(ss, dataStaff.pass);
 }
 
 string countTime(int index, int &hour, int &minute){
@@ -436,7 +420,7 @@ void menuSort(){
 }
 
 void cariFilm() {
-    bool found = 0, currentFilm;
+    bool found = 0, current;
     string keyword, line;
 
     system("cls");
@@ -451,15 +435,15 @@ void cariFilm() {
                 getline(file, line);
             }
             splitFileDataFilm(line);
-            currentFilm = 0;
+            current = 0;
             if (dataFilm.judul.find(keyword) != string::npos){
                 cout << "\nJudul      : " << dataFilm.judul;
                 cout << "\nRating     : " << dataFilm.rating;
                 cout << "\nGenre      : " << dataFilm.genre << endl;
                 found = 1;
 
-                if (i >= 0 && i < maxCurrent) currentFilm = 1;
-                if (currentFilm){
+                if (i >= 0 && i < maxCurrent) current = 1;
+                if (current){
                     cout << "Jam Tayang : ";
                     for (int i = 0; i < maxStudio; i++){
                         for (int j = 0; j < maxCurrent; j++){
@@ -503,7 +487,6 @@ void viewCurrentFilm(){
 
 void cetakTiket(int studio, int film, int tayang){
     system ("cls");
-    int baris, kolom;
     penonton *ptrPenonton = &dataPenonton;
 
     cout << "Selamat menikmati film!\n\n";
@@ -582,6 +565,12 @@ void deleteSeat(int studio, int film, int tayang, int &indexSeat, int &seatSold)
     cout << "\nInput baris & kolom (contoh: 5 7)\n";
     cout << "Pilih kursi : "; cin >> baris >> kolom;
 
+    if ((baris < 1 || baris > rows) && (kolom < 1 || kolom > cols)){
+        cout << "\nInput tidak valid\n";
+        system("pause");
+        return;
+    }
+
     if (ptrSeats->seatsDisplay[baris - 1][kolom - 1] == "|   "){
         cout << "\nKursi sudah kosong\n";
         system("pause");
@@ -590,9 +579,10 @@ void deleteSeat(int studio, int film, int tayang, int &indexSeat, int &seatSold)
 
     ptrSeats->seatsDisplay[baris - 1][kolom - 1] = "|   ";
     for (int i = 0; i < rows * cols; i++){
-        if (ptrPenonton->baris[i] == to_string(baris) && ptrPenonton->kolom[i] == to_string(kolom))
+        if (ptrPenonton->baris[i] == to_string(baris) && ptrPenonton->kolom[i] == to_string(kolom)){
             ptrPenonton->baris[i] = "";
             ptrPenonton->kolom[i] = "";
+        }
     }
     seatSold--; indexSeat--;
 
@@ -628,6 +618,12 @@ void addSeat(int studio, int film, int tayang, int &indexSeat, int &seatSold){
     displaySeats(studio, film, tayang);
     cout << "\nInput baris & kolom (contoh: 5 7)\n";
     cout << "Pilih kursi : "; cin >> baris >> kolom;
+
+    if ((baris < 1 || baris > rows) && (kolom < 1 || kolom > cols)){
+        cout << "\nInput tidak valid\n";
+        system("pause");
+        return;
+    }
 
     if (ptrSeats->seatsDisplay[baris - 1][kolom - 1] == "| X "){
         cout << "\nKursi sudah terpakai\n\n";
@@ -812,7 +808,7 @@ void login(bool &ulangMasuk, int limitLogin){
 
     ifstream file(fileStaff);
     if (file.is_open()){
-        for (int i = 0; i <= jmlStaff; i++){
+        for (int i = 0; i < jmlStaff; i++){
             getline(file, line);
             splitFileDataStaff(line);
             if (usn == dataStaff.usn && pass == dataStaff.pass){
