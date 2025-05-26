@@ -7,7 +7,7 @@ using namespace std;
 
 const int maxCurrent = 5, maxStudio = 3, maxShowtimes = 3;
 const int rows = 6, cols = 8;
-string fileFilm = "data_film.csv",
+const string fileFilm = "data_film.csv",
        fileStaff = "data_staff.csv",
        fileJadwal = "data_jadwal.csv";
 
@@ -214,7 +214,7 @@ void editFilm(){
                      << "[3] Genre  : " << dataFilm.genre << endl
                      << "[4] Durasi : " << dataFilm.durasi << endl
                      << "[5] Keluar\n\n";
-                cout << "Pilih Edit : "; cin >> pilihEdit; cin.ignore();
+                cout << "Pilih edit : "; cin >> pilihEdit; cin.ignore();
 
                 switch (pilihEdit){
                     case 1: cout << "\nJudul baru : "; getline(cin, judul); dataFilm.judul = judul; break;
@@ -257,7 +257,7 @@ void editFilm(){
 
 void hapusFilm(){
     int kodeHapus, count = 0;
-    string line, lineDelete, linesTemp[jmlFilm];
+    string line, lineDelete, temp[jmlFilm];
     bool ulangHapus = 1;
 
     if (jmlFilm <= maxCurrent){
@@ -269,8 +269,8 @@ void hapusFilm(){
     }
 
     while (ulangHapus){
-        int i = 1;
         system("cls");
+        int i = 1;
         cout << "HAPUS FILM\n\n";
 
         ifstream file(fileFilm);
@@ -298,7 +298,7 @@ void hapusFilm(){
                     fileDelete.seekg(0, ios::beg);
                     while(getline(fileDelete, line)){
                         if (line != lineDelete){
-                            linesTemp[count] = line; count++;
+                            temp[count] = line; count++;
                         }
                     } 
                 }
@@ -307,7 +307,7 @@ void hapusFilm(){
             ofstream fileUpdate(fileFilm);
             if (fileUpdate.is_open()){
                 for (int i = 0; i < count; i++){
-                    fileUpdate << linesTemp[i] << endl;
+                    fileUpdate << temp[i] << endl;
                 }
                 cout << "\nFilm telah dihapus\n"; system("pause");
                 jmlFilm--;
@@ -320,20 +320,21 @@ void hapusFilm(){
 
 void tambahFilm(){
     system("cls");
+    string judul, rating, genre, durasi;
     
     cout << "TAMBAH FILM\n\n";
-    cout << "Judul Film     : "; cin.ignore(); getline(cin, dataFilm.judul);
-    cout << "Rating         : "; cin >> dataFilm.rating;
-    cout << "Genre          : "; cin.ignore(); getline(cin, dataFilm.genre);
-    cout << "Durasi (menit) : "; cin >> dataFilm.durasi;    
+    cout << "Judul Film     : "; cin.ignore(); getline(cin, judul);
+    cout << "Rating         : "; getline(cin, rating);
+    cout << "Genre          : "; getline(cin, genre);
+    cout << "Durasi (menit) : "; cin >> durasi;    
 
     ofstream file(fileFilm, ios::app);
     if (file.is_open()){
         cout << setfill(' ');
-        file << dataFilm.judul << ","
-             << dataFilm.rating << ","
-             << dataFilm.genre << ","
-             << to_string(dataFilm.durasi) << endl;
+        file << judul << ","
+             << rating << ","
+             << genre << ","
+             << durasi << endl;
 
         cout << "\nFilm berhasil ditambahkan\n";
         jmlFilm++; jadwalChange = 1;
@@ -342,11 +343,11 @@ void tambahFilm(){
     file.close();
 }
 
-void menuEdit(){
-    int kodeEdit;
-    bool ulangEdit = 1;
+void menuManage(){
+    int kodeManage;
+    bool ulangManage = 1;
         
-    while (ulangEdit){
+    while (ulangManage){
         system("cls");
 
         if (jadwalChange){
@@ -356,8 +357,8 @@ void menuEdit(){
         }
 
         updateJadwal(0);
-        cout << "EDIT INFORMASI JADWAL\n\n";
-        cout << "PERHATIAN!\n"
+        cout << "MANAGE JADWAL\n";
+        cout << "\nPERHATIAN!\n"
              << "# Bioskop hanya menampilkan " << maxCurrent << " film terbaru\n"
              << "# Jika tambah film baru maka film terlama tidak akan ditayangkan\n"
              << "# Data film lama masih disimpan kecuali dihapus\n\n";
@@ -366,13 +367,13 @@ void menuEdit(){
              << "[2] Hapus Film\n"
              << "[3] Edit Film\n"
              << "[4] Keluar\n\n";
-        cout << "Pilih kode : "; cin >> kodeEdit;
+        cout << "Pilih kode : "; cin >> kodeManage;
         
-        switch (kodeEdit){
+        switch (kodeManage){
             case 1: tambahFilm(); break;
             case 2: hapusFilm(); break;
             case 3: editFilm(); break;
-            case 4: ulangEdit = 0; break;
+            case 4: ulangManage = 0; break;
             default:
                 cout << "Kode menu tidak valid" << endl;
                 system("pause");
@@ -510,7 +511,7 @@ void cetakTiket(int studio, int film, int tayang){
 
             cout << "+" << setfill('-') << setw(65) << "" << "+" << endl;
             cout << left << setfill(' ');
-            cout << setw(65) << "| Bioskop X " << " |";
+            cout << setw(65) << "| TATANG ENTERTAINMENT" << " |";
             cout << "\n| Film       : " << setw(50) << dataStudio[studio].dataJadwal[film].judul << " |"
                  << "\n| Jam Tayang : " << setw(50) << dataStudio[studio].dataJadwal[film].jamTayang[tayang] << " |"
                  << "\n| Studio     : " << setw(50) << dataStudio[studio].nama << " |"
@@ -524,12 +525,9 @@ void cetakTiket(int studio, int film, int tayang){
 
 void displaySeats(int studio, int film, int tayang){
     system("cls");
-    char ulangPilih;
-    bool kosong = 0;
     seats *ptrSeats = &dataStudio[studio].dataJadwal[film].seats[tayang];
 
     cout << "Kursi ruang " << dataStudio[studio].nama << endl << endl;
-
     cout << "    ";
     for (int i = 0; i < cols; i++){
         cout << "  " << i + 1 << " ";
@@ -537,7 +535,6 @@ void displaySeats(int studio, int film, int tayang){
     cout << "\n\n    " << setfill('-') << setw(cols * 4 + 1) << "" << endl;
     for (int i = rows; i > 0; i--){
         cout << i << (i > 9 ? "  " : "   ");
-
         for (int j = 0; j < cols; j++){
             cout << ptrSeats->seatsDisplay[i - 1][j];
         }
@@ -548,7 +545,7 @@ void displaySeats(int studio, int film, int tayang){
 }
 
 void deleteAllSeat(int studio, int film, int tayang, int &seatSold){
-    string temp[27 * (rows * cols)], line;
+    string temp[rows * cols], line;
     int count = 0;
     seatSold = 0;
 
@@ -578,7 +575,7 @@ void deleteSeat(int studio, int film, int tayang, int &indexSeat, int &seatSold)
     int baris, kolom, count = 0;
     seats *ptrSeats = &dataStudio[studio].dataJadwal[film].seats[tayang];
     penonton *ptrPenonton = &dataPenonton;
-    string temp[27 * (rows * cols)], line;
+    string temp[rows * cols], line;
 
     displaySeats(studio, film, tayang);
     cout << "\nInput baris & kolom (contoh: 5 7)\n";
@@ -652,7 +649,6 @@ void addSeat(int studio, int film, int tayang, int &indexSeat, int &seatSold){
              << to_string(kolom - 1) << endl;
     }
     file.close();
-
 }
 
 void updateSeats(){
@@ -726,7 +722,7 @@ void menuSeats(int studio, int film, int tayang){
     }
 }
 
-void pilihJadwal() {
+void pilihJadwal(){
     system("cls");
     int studio, film, tayang, count = 1;
     updateSeats();
@@ -761,7 +757,7 @@ void pilihJadwal() {
     menuSeats(studio - 1, film - 1, tayang - 1);    
 }
 
-void menuUtama() {
+void menuUtama(){
     int kodeMenu;
     bool ulangUtama = 1;
 
@@ -784,7 +780,7 @@ void menuUtama() {
             case 3: viewCurrentFilm(); break;
             case 4: cariFilm(); break;
             case 5: menuSort(); break;
-            case 6: menuEdit(); break;
+            case 6: menuManage(); break;
             case 7: ulangUtama = 0; break;
             default:
                 cout << "Kode menu tidak valid" << endl;
@@ -840,7 +836,7 @@ void login(bool &ulangMasuk, int limitLogin){
     }
 }
 
-void signup() {
+void signup(){
     string line;
     string nama, usn, pass;
 
@@ -874,13 +870,13 @@ void signup() {
     fileWrite.close();
 }
 
-void menuMasuk() {
+void menuMasuk(){
     int kodeMasuk, limitLogin = 5;
     bool ulangMasuk = 1;
 
     while (ulangMasuk) {
         system("cls");
-        cout << "SISTEM BIOSKOP X\n";
+        cout << "SISTEM BIOSKOP TATANG ENTERTAINMENT\n";
         cout << "\n[1] Masuk";
         cout << "\n[2] Daftar";
         cout << "\n[3] Keluar\n";
@@ -897,7 +893,7 @@ void menuMasuk() {
     }
 }
 
-main() {
+main(){
     string line;
 
     ifstream fileF(fileFilm);
