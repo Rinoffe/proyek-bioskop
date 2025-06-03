@@ -98,6 +98,7 @@ string countTime(int index, int &hour, int &minute){
 }
 
 void updateJadwal(bool display){
+// juga untuk menampilkan jadwal
     string line;
 
     if (display){
@@ -315,11 +316,7 @@ void tambahFilm(){
 
     ofstream file(fileFilm, ios::app);
     if (file.is_open()){
-        cout << setfill(' ');
-        file << judul << ","
-             << rating << ","
-             << genre << ","
-             << durasi << endl;
+        file << judul << "," << rating << "," << genre << "," << durasi << endl;
 
         cout << "\nFilm berhasil ditambahkan\n";
         jmlFilm++; jadwalChange = 1;
@@ -429,6 +426,7 @@ void cariFilm() {
 
     ifstream file(fileFilm);
     if (file.is_open()){
+        // Membaca file dari bawah
         for (int i = 0; i < jmlFilm; i++){
             file.seekg(0, ios::beg);
             for (int j = 0; j < jmlFilm - i; j++){
@@ -570,7 +568,6 @@ void deleteSeat(int studio, int film, int tayang, int &indexSeat, int &seatSold)
         system("pause");
         return;
     }
-
     if (ptrSeats->seatsDisplay[baris - 1][kolom - 1] == "|   "){
         cout << "\nKursi sudah kosong\n";
         system("pause");
@@ -624,7 +621,6 @@ void addSeat(int studio, int film, int tayang, int &indexSeat, int &seatSold){
         system("pause");
         return;
     }
-
     if (ptrSeats->seatsDisplay[baris - 1][kolom - 1] == "| X "){
         cout << "\nKursi sudah terpakai\n\n";
         system("pause");
@@ -795,7 +791,6 @@ void login(bool &ulangMasuk, int limitLogin){
         system("pause");
         return;
     }
-
     if (limitLogin == 0){
         ulangMasuk = 0;
         return;
