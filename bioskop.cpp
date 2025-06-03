@@ -565,7 +565,7 @@ void deleteSeat(int studio, int film, int tayang, int &indexSeat, int &seatSold)
     cout << "\nInput baris & kolom (contoh: 5 7)\n";
     cout << "Pilih kursi : "; cin >> baris >> kolom;
 
-    if ((baris < 1 || baris > rows) && (kolom < 1 || kolom > cols)){
+    if ((baris < 1 || baris > rows) || (kolom < 1 || kolom > cols)){
         cout << "\nInput tidak valid\n";
         system("pause");
         return;
@@ -619,7 +619,7 @@ void addSeat(int studio, int film, int tayang, int &indexSeat, int &seatSold){
     cout << "\nInput baris & kolom (contoh: 5 7)\n";
     cout << "Pilih kursi : "; cin >> baris >> kolom;
 
-    if ((baris < 1 || baris > rows) && (kolom < 1 || kolom > cols)){
+    if ((baris < 1 || baris > rows) || (kolom < 1 || kolom > cols)){
         cout << "\nInput tidak valid\n";
         system("pause");
         return;
